@@ -3,7 +3,9 @@ package wanted.market.api.model.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import wanted.market.api.model.type.RoleType;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -32,5 +34,10 @@ public class Member {
 //    @Column(name = "ROLE")
 //    private RoleType role;
 
+    @OneToMany(mappedBy = "member")
+    private List<Item> items = new ArrayList<>();
 
+
+    @OneToMany(mappedBy = "member")
+    private List<Orders> orders = new ArrayList<>();
 }
