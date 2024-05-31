@@ -4,17 +4,6 @@ server:
       enabled: true
 
 spring:
-  jpa:
-    database: oracle
-    hibernate:
-      ddl-auto: create
-    generate-ddl: false
-    properties:
-      hibernate:
-        format_sql: false
-        show_sql: false
-        dialect: org.hibernate.dialect.OracleDialect
-
   config:
     import:
       - classpath:/config/secret.yml
@@ -27,7 +16,7 @@ logging:
     org.hibernate.type.descriptor.sql.BasicBinder: off
     org.hibernate.type.descriptor.sql.BasicExtractor: off
     root: info
-  file:
-    name: log/application.log
+#  file:
+#    name: log/application.log
 
 
