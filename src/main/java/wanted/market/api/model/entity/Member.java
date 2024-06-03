@@ -34,7 +34,7 @@ public class Member {
 //    @Column(name = "ROLE")
 //    private RoleType role;
 
-    @OneToMany(mappedBy = "member")
+    @OneToMany(mappedBy = "member", cascade = CascadeType.REMOVE)
     private List<Item> items = new ArrayList<>();
 
 
