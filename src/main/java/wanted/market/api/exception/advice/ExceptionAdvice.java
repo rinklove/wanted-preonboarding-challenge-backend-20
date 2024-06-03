@@ -3,8 +3,8 @@ package wanted.market.api.exception.advice;
 
 import jakarta.servlet.UnavailableException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -34,4 +34,11 @@ public class ExceptionAdvice {
     public ErrorResult unauthorizedExceptionHandler(RuntimeException e) {
         return new ErrorResult(HttpStatus.UNAUTHORIZED.value(), e.getMessage(), LocalDateTime.now());
     }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(value = {DataIntegrityViolationException.class, NullPointerException.class})
+    public ErrorResult DataIntegrityViolationExceptionHandler(RuntimeException e) {
+        return new ErrorResult(HttpStatus.BAD_REQUEST.value(), e.getMessage(), LocalDateTime.now());
+    }
+
 }
