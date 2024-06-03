@@ -8,7 +8,6 @@ import wanted.market.api.model.entity.Member;
 import java.util.Optional;
 
 @Repository
-
 public interface MemberRepository extends JpaRepository<Member, Long> {
 
     Optional<Member> findByMemberId(String memberId);
