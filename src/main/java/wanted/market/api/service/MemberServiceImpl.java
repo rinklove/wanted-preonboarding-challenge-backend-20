@@ -22,9 +22,8 @@ public class MemberServiceImpl implements MemberService{
     @Override
     public String signup(SignupRequestDto dto) {
 
-        if(memberRepository.existsByMemberId(dto.getPassword())) {
-            throw new RuntimeException("아이디가 이미 존재합니다.");
-        }
+        checkNull(dto);
+        isDuplicated(dto);
 
         Member newMember = Member.builder()
                 .memberId(dto.getMemberId())
@@ -35,5 +34,18 @@ public class MemberServiceImpl implements MemberService{
 
         memberRepository.saveAndFlush(newMember);
         return "회원가입 성공";
+    }
+
+    private void isDuplicated(SignupRequestDto dto) {
+        if(memberRepository.existsByMemberId(dto.getMemberId())) {
+            throw new RuntimeException("아이디가 이미 존재합니다.");
+        }
+    }
+
+    private static void checkNull(SignupRequestDto dto) {
+        if(!(dto.getMemberId() != null && dto.getPassword() != null && dto.getNickname() != null &&
+                dto.getEmail() != null)) {
+            throw new NullPointerException("필수 입력값이 누락되어있습니다.");
+        }
     }
 }
