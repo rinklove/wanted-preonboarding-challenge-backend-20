@@ -29,8 +29,8 @@ public class SecurityConfig {
     private final AuthenticationEntryPoint customAuthenticationEntryPoint;
 
     private static final String[] WHITE_LIST = {
-            "/api/member/**", "/api/swagger/*", "/api-docs", "swagger-custom.html"
-
+            "/api/member/**", "/api/swagger/*", "/api-docs", "swagger-custom.html",
+            "/api/item/list", "/api/item/{itemNo}"
     };
 
     @Bean
@@ -49,9 +49,9 @@ public class SecurityConfig {
 
         http.addFilterBefore(new JwtAuthFilter(jwtTokenProvider, customUserDetailService), UsernamePasswordAuthenticationFilter.class);
 
-//        http.exceptionHandling((exceptionHandling) ->
-//                exceptionHandling.accessDeniedHandler(accessDeniedHandler)
-//                        .authenticationEntryPoint(customAuthenticationEntryPoint));
+        http.exceptionHandling((exceptionHandling) ->
+                exceptionHandling.accessDeniedHandler(accessDeniedHandler)
+                        .authenticationEntryPoint(customAuthenticationEntryPoint));
 
         http.authorizeHttpRequests(authorize -> authorize
                 .requestMatchers(WHITE_LIST).permitAll()

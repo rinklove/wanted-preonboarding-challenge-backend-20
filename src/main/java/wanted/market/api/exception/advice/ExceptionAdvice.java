@@ -18,7 +18,9 @@ import java.time.LocalDateTime;
 public class ExceptionAdvice {
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler(value = {IllegalArgumentException.class,IllegalStateException.class})
+    @ExceptionHandler(value = {IllegalArgumentException.class,IllegalStateException.class,
+            DataIntegrityViolationException.class, NullPointerException.class,
+    RuntimeException.class})
     public ErrorResult illegalExceptionHandler(RuntimeException e) {
         return new ErrorResult(HttpStatus.BAD_REQUEST.value(), e.getMessage(), LocalDateTime.now());
     }
@@ -35,10 +37,10 @@ public class ExceptionAdvice {
         return new ErrorResult(HttpStatus.UNAUTHORIZED.value(), e.getMessage(), LocalDateTime.now());
     }
 
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler(value = {DataIntegrityViolationException.class, NullPointerException.class})
-    public ErrorResult DataIntegrityViolationExceptionHandler(RuntimeException e) {
-        return new ErrorResult(HttpStatus.BAD_REQUEST.value(), e.getMessage(), LocalDateTime.now());
-    }
+//    @ResponseStatus(HttpStatus.BAD_REQUEST)
+//    @ExceptionHandler(value = {})
+//    public ErrorResult DataIntegrityViolationExceptionHandler(RuntimeException e) {
+//        return new ErrorResult(HttpStatus.BAD_REQUEST.value(), e.getMessage(), LocalDateTime.now());
+//    }
 
 }
