@@ -36,7 +36,18 @@ public class AuthServiceImpl implements AuthService {
             throw new IllegalStateException("아이디 또는 비밀번호가 일치하지 않습니다.");
         }
 
-        CustomUserInfoDto info = modelMapper.map(findMember, CustomUserInfoDto.class);
+        CustomUserInfoDto info = new CustomUserInfoDto(findMember.getMemberId()
+                , findMember.getPassword()
+                , findMember.getEmail()
+                , findMember.getNickname(), null);
         return tokenProvider.createAccessToken(info);
+    }
+
+    @Override
+    public Member findByToken(String token) {
+        log.info("token = {}", token);
+        String memberId = tokenProvider.getMemberId(token);
+        log.info("memberId = {}", memberId);
+        return memberRepository.findByMemberId(memberId).orElseThrow(() ->  new IllegalArgumentException("존재하지 않는 회원입니다."));
     }
 }
