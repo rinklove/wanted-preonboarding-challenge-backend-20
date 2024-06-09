@@ -28,6 +28,6 @@ public class MemberController {
     @PostMapping("/sign-up")
     public ResponseEntity<String> addNewMember(@Valid @RequestBody SignupRequestDto dto) {
         log.info("dto = {}", dto);
-        return ResponseEntity.status(HttpStatus.OK).body(memberService.signup(dto));
+        return ResponseEntity.status(HttpStatus.CREATED).body(memberService.signup(dto));
     }
 }
