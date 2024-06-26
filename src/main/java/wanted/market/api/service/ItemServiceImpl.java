@@ -1,6 +1,7 @@
 package wanted.market.api.service;
 
 import jakarta.annotation.PostConstruct;
+import jakarta.persistence.NoResultException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -9,15 +10,11 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import wanted.market.api.config.jwt.JwtTokenProvider;
 import wanted.market.api.model.dto.item.ItemDetailResponseDto;
-import wanted.market.api.model.dto.item.ItemDto;
 import wanted.market.api.model.dto.item.ItemListResponseDto;
-import wanted.market.api.model.dto.member.LoginRequestDto;
 import wanted.market.api.model.entity.Item;
-import wanted.market.api.model.entity.Member;
 import wanted.market.api.repository.ItemRepository;
 import wanted.market.api.repository.impl.ItemRepositoryImpl;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -38,9 +35,9 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemDetailResponseDto findOne(Long itemNo) {
-
-        return null;
+    public ItemDetailResponseDto findOne(Long itemNo, String token) {
+        String nickname = token != null ? tokenProvider.getNickname(token.substring(7)) : null;
+        return itemRepositoryImpl.findById(itemNo, nickname);
     }
 
 

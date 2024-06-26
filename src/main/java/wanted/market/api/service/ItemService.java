@@ -10,5 +10,5 @@ public interface ItemService {
 
     List<ItemListResponseDto> findList(int page);
 
-    ItemDetailResponseDto findOne(Long itemNo);
+    ItemDetailResponseDto findOne(Long itemNo, String token);
 }
