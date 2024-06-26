@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+import java.time.LocalDateTime;
+
 @Getter @ToString
 @NoArgsConstructor
 @AllArgsConstructor
@@ -13,7 +15,8 @@ import lombok.ToString;
 public class OrderLog {
     private String seller;
     private String buyer;
-    private int price;
-    private int quantity;
-    private String orderDate;
+    private long price;
+    private long quantity;
+    private LocalDateTime orderDate;
+
 }

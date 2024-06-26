@@ -35,7 +35,7 @@ public class ItemListResponseDto {
 
     public String setState(ItemState state) {
         return switch (state) {
-            case SELLING -> "판메중";
+            case SELLING -> "판매중";
             case RESERVING -> "예약중";
             default -> "판매 완료";
         };

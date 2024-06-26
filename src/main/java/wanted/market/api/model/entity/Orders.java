@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.NoArgsConstructor;
 import wanted.market.api.model.type.OrderState;
 
+import java.time.LocalDateTime;
+
 @Entity @Builder
 @Table(name = "ORDERS")
 @NoArgsConstructor
@@ -19,6 +21,9 @@ public class Orders {
     @Column(name = "PRICE")
     private Long price;
 
+    @Column(name = "QUANTITY")
+    private Long quantity;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ITEM_NO")
     private Item item;
@@ -29,5 +34,8 @@ public class Orders {
 
     @Enumerated(EnumType.STRING)
     private OrderState state;
+
+    @Column(name = "ORDER_DATE")
+    private LocalDateTime orderDate;
 
 }
