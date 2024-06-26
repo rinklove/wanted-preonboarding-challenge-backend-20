@@ -1,6 +1,7 @@
 package wanted.market.api.exception.advice;
 
 
+import jakarta.persistence.NoResultException;
 import jakarta.servlet.UnavailableException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -20,7 +21,7 @@ public class ExceptionAdvice {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(value = {IllegalArgumentException.class,IllegalStateException.class,
             DataIntegrityViolationException.class, NullPointerException.class,
-    RuntimeException.class})
+    RuntimeException.class, NoResultException.class})
     public ErrorResult illegalExceptionHandler(RuntimeException e) {
         return new ErrorResult(HttpStatus.BAD_REQUEST.value(), e.getMessage(), LocalDateTime.now());
     }
