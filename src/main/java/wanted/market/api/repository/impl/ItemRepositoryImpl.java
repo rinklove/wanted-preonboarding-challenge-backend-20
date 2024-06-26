@@ -6,7 +6,9 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
+import wanted.market.api.model.dto.item.ItemDetailResponseDto;
 import wanted.market.api.model.dto.item.ItemListResponseDto;
+import wanted.market.api.model.dto.orders.OrderLog;
 import wanted.market.api.repository.CustomItemRepository;
 
 import java.util.List;
@@ -19,6 +21,7 @@ import static wanted.market.api.model.entity.QMember.member;
 public class ItemRepositoryImpl implements CustomItemRepository {
 
     private final JPAQueryFactory queryFactory;
+    private final OrdersRepositoryImpl ordersRepository;
     @Override
     public List<ItemListResponseDto> findAll(Pageable pageable) {
         return queryFactory.select(Projections.constructor(ItemListResponseDto.class,
@@ -34,5 +37,57 @@ public class ItemRepositoryImpl implements CustomItemRepository {
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
+    }
+
+    /**
+     * select
+     *      item.no
+     *      , itemName
+     *      , price
+     *      , quantity
+     *      , state
+     *      , nickname
+     * from item i
+     * inner join member m
+     * where i.no = itemNo;
+     * on item.member=member
+     * @param itemNo
+     * @return
+     */
+    @Override
+    public ItemDetailResponseDto findById(Long itemNo, String nickname) {
+        ItemDetailResponseDto findItem = queryFactory.select(Projections.constructor(ItemDetailResponseDto.class,
+                        item.no,
+                        item.name,
+                        item.price,
+                        item.quantity,
+                        item.state,
+                        member.nickname))
+                .from(item)
+                .innerJoin(member).on(item.member.eq(member))
+                .where(item.no.eq(itemNo))
+                .fetchOne();
+
+        List<OrderLog> logs = getLogs(findItem.getNickname(), nickname, itemNo);
+        findItem.verify(isSeller(findItem.getNickname(), nickname), logs);
+        return findItem;
+    }
+
+    private boolean isSeller(String sellerNick, String memberNick) {
+        return memberNick != null && sellerNick.equals(memberNick);
+    }
+
+    private List<OrderLog> getLogs(String sellerNick, String memberNick, Long itemNo) {
+        boolean isMember = memberNick != null;
+        if(!isMember)
+            return null;
+
+        List<OrderLog> logs = null;
+        if(isSeller(sellerNick, memberNick)) {
+            logs = ordersRepository.findAll(itemNo);
+        } else {
+            logs = ordersRepository.findAll(itemNo, memberNick);
+        }
+        return logs;
     }
 }
