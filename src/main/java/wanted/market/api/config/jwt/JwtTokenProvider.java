@@ -63,6 +63,10 @@ public class JwtTokenProvider {
         return parseClaims(token).get("memberId", String.class);
     }
 
+    public String getNickname(String token) {
+        return parseClaims(token).get("nickname", String.class);
+    }
+
     public boolean validateToken(String token) {
         try {
             Jwts.parserBuilder().setSigningKey(cachedSecretKey).build().parseClaimsJws(token);
