@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import wanted.market.api.model.dto.member.SignupRequestDto;
 import wanted.market.api.model.entity.Member;
+import wanted.market.api.model.type.RoleType;
 import wanted.market.api.repository.MemberRepository;
 
 @Slf4j
@@ -30,6 +31,7 @@ public class MemberServiceImpl implements MemberService{
                 .password(passwordEncoder.encode(dto.getPassword()))
                 .email(dto.getEmail())
                 .nickname(dto.getNickname())
+                .role(RoleType.USER)
                 .build();
 
         memberRepository.saveAndFlush(newMember);

@@ -3,6 +3,7 @@ package wanted.market.api.model.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import wanted.market.api.model.type.RoleType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,9 +31,9 @@ public class Member {
     @Column(name = "EMAIL", nullable = false)
     private String email;
 
-//    @Enumerated(EnumType.STRING)
-//    @Column(name = "ROLE")
-//    private RoleType role;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "ROLE")
+    private RoleType role;
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.REMOVE)
     private List<Item> items = new ArrayList<>();
