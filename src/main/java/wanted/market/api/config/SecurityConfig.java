@@ -12,8 +12,6 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import wanted.market.api.config.handler.CustomAccessDeniedHandler;
-import wanted.market.api.config.handler.CustomAuthenticationEntryPoint;
 import wanted.market.api.config.jwt.JwtAuthFilter;
 import wanted.market.api.config.jwt.JwtTokenProvider;
 import wanted.market.api.service.CustomUserDetailService;

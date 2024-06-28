@@ -1,6 +1,5 @@
 package wanted.market.api.model.dto.item;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
@@ -8,9 +7,6 @@ import wanted.market.api.model.type.ItemState;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-
-import static wanted.market.api.model.type.ItemState.RESERVING;
-import static wanted.market.api.model.type.ItemState.SELLING;
 
 @Getter @ToString
 @NoArgsConstructor

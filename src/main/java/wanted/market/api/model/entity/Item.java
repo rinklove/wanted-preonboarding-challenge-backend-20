@@ -3,7 +3,6 @@ package wanted.market.api.model.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.boot.context.properties.bind.DefaultValue;
 import wanted.market.api.model.dto.item.ItemDto;
 import wanted.market.api.model.type.ItemState;
 

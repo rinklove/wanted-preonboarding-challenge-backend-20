@@ -10,7 +10,6 @@ import org.springframework.transaction.annotation.Transactional;
 import wanted.market.api.config.jwt.JwtTokenProvider;
 import wanted.market.api.model.dto.member.CustomUserInfoDto;
 import wanted.market.api.model.dto.member.LoginRequestDto;
-import wanted.market.api.model.dto.member.SignupRequestDto;
 import wanted.market.api.model.entity.Member;
 import wanted.market.api.repository.MemberRepository;
 

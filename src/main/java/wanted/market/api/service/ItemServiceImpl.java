@@ -1,7 +1,5 @@
 package wanted.market.api.service;
 
-import jakarta.annotation.PostConstruct;
-import jakarta.persistence.NoResultException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
