@@ -29,7 +29,7 @@ public class SecurityConfig {
     private final AuthenticationEntryPoint customAuthenticationEntryPoint;
 
     private static final String[] WHITE_LIST = {
-            "/api/member/**", "/api/swagger/*", "/api-docs", "swagger-custom.html",
+            "/api/member/**", "/api/swagger/**", "/api-docs", "swagger-custom.html",
             "/api/item/list", "/api/item/{itemNo}"
     };
 
