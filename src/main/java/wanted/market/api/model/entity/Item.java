@@ -46,6 +46,7 @@ public class Item {
 
     public static Item enrollNew(ItemDto dto, Member member) {
         return Item.builder()
+                .no(null)
                 .name(dto.getName())
                 .price(dto.getPrice())
                 .quantity(dto.getQuantity())
