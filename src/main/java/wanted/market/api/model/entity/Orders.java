@@ -3,12 +3,14 @@ package wanted.market.api.model.entity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import wanted.market.api.model.type.OrderState;
 
 import java.time.LocalDateTime;
 
 @Entity @Builder
+@Getter
 @Table(name = "ORDERS")
 @NoArgsConstructor
 @AllArgsConstructor
@@ -38,4 +40,15 @@ public class Orders {
     @Column(name = "ORDER_DATE")
     private LocalDateTime orderDate;
 
+    public static Orders addition(Item item, Member buyer) {
+        return Orders.builder()
+                .no(null)
+                .price(item.getPrice())
+                .quantity(1L)
+                .item(item)
+                .member(buyer)
+                .state(OrderState.OUTSTANDING)
+                .orderDate(LocalDateTime.now())
+                .build();
+    }
 }

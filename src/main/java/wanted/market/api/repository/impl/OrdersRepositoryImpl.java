@@ -4,7 +4,9 @@ import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+import wanted.market.api.model.dto.item.ItemPurchaseResponseDto;
 import wanted.market.api.model.dto.orders.OrderLog;
+import wanted.market.api.model.entity.Orders;
 import wanted.market.api.repository.CustomOrdersRepository;
 
 import java.util.List;
@@ -54,5 +56,25 @@ public class OrdersRepositoryImpl implements CustomOrdersRepository {
                 .innerJoin(member).on(orders.member.eq(member))
                 .where(orders.item.no.eq(itemNo).and(member.nickname.eq(nickname)))
                 .fetch();
+    }
+
+    /**
+     * 구매 로그 가져오기
+     * @param orderNo
+     * @return
+     */
+    @Override
+    public ItemPurchaseResponseDto findPurchaseLog(long orderNo) {
+        return queryFactory.select(Projections.constructor(ItemPurchaseResponseDto.class,
+                    orders.orderDate.stringValue()
+                            .concat("_")
+                            .concat(orders.no.stringValue()),
+                    orders.item.name,
+                    orders.price,
+                    orders.quantity,
+                    orders.orderDate))
+                .from(orders)
+                .where(orders.no.eq(orderNo))
+                .fetchOne();
     }
 }
