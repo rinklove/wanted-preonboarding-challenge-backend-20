@@ -11,7 +11,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity @Builder
-@Getter @ToString(of = {"no", "name", "price", "quantity", "state", "enrollDate"})
+@Getter @Setter
+@ToString(of = {"no", "name", "price", "quantity", "state", "enrollDate"})
 @NoArgsConstructor
 @AllArgsConstructor
 public class Item {

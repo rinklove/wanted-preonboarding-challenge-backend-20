@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import wanted.market.api.model.dto.item.ItemDetailResponseDto;
 import wanted.market.api.model.dto.item.ItemDto;
 import wanted.market.api.model.dto.item.ItemListResponseDto;
+import wanted.market.api.model.dto.item.ItemPurchaseResponseDto;
 import wanted.market.api.service.ItemService;
 
 import java.util.List;
@@ -43,8 +44,20 @@ public class ItemController {
     }
 
 
+    /**
+     * 상품 등록
+     * @param token
+     * @param dto
+     * @return
+     */
     @PostMapping("/enroll")
-    ResponseEntity<String> enrollItem(@RequestHeader(name = "Authorization") String token, @Valid @RequestBody ItemDto dto) {
+    public ResponseEntity<String> enrollItem(@RequestHeader(name = "Authorization") String token, @Valid @RequestBody ItemDto dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(itemService.enrollItem(token, dto));
+    }
+
+    @PostMapping("/purchase/{no}")
+    public ResponseEntity<ItemPurchaseResponseDto> purchaseItem(@PathVariable Long no,
+                                                                @RequestHeader(name = "Authorization") String token) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(itemService.purchase(token, no));
     }
 }

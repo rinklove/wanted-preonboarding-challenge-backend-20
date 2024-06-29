@@ -4,6 +4,7 @@ package wanted.market.api.service;
 import wanted.market.api.model.dto.item.ItemDetailResponseDto;
 import wanted.market.api.model.dto.item.ItemDto;
 import wanted.market.api.model.dto.item.ItemListResponseDto;
+import wanted.market.api.model.dto.item.ItemPurchaseResponseDto;
 
 import java.util.List;
 
@@ -14,4 +15,6 @@ public interface ItemService {
     ItemDetailResponseDto findOne(Long itemNo, String token);
 
     String enrollItem(String token, ItemDto dto);
+
+    ItemPurchaseResponseDto purchase(String token, Long itemNo);
 }
