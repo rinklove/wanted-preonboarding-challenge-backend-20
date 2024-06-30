@@ -17,6 +17,7 @@ public class OrderLog {
     private String buyer;
     private long price;
     private long quantity;
+    private String state;
     private LocalDateTime orderDate;
 
 }

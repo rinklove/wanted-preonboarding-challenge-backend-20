@@ -1,12 +1,14 @@
 package wanted.market.api.repository.impl;
 
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import wanted.market.api.model.dto.item.ItemPurchaseResponseDto;
 import wanted.market.api.model.dto.orders.OrderLog;
 import wanted.market.api.model.entity.Orders;
+import wanted.market.api.model.type.OrderState;
 import wanted.market.api.repository.CustomOrdersRepository;
 
 import java.util.List;
@@ -31,6 +33,11 @@ public class OrdersRepositoryImpl implements CustomOrdersRepository {
                     member.nickname,
                     orders.price,
                     orders.item.quantity,
+                        new CaseBuilder()
+                                .when(orders.state.eq(OrderState.OUTSTANDING)).then("구매 대기중")
+                                .when(orders.state.eq(OrderState.CONFIRMED)).then("구매 확정")
+                                .when(orders.state.eq(OrderState.APPROVED)).then("구매 승인")
+                                .otherwise("구매 취소됨"),
                     orders.orderDate))
                 .from(orders)
                 .innerJoin(member).on(orders.member.eq(member))
@@ -51,6 +58,11 @@ public class OrdersRepositoryImpl implements CustomOrdersRepository {
                         member.nickname,
                         orders.price,
                         orders.item.quantity,
+                        new CaseBuilder()
+                                .when(orders.state.eq(OrderState.OUTSTANDING)).then("구매 대기중")
+                                .when(orders.state.eq(OrderState.CONFIRMED)).then("구매 확정")
+                                .when(orders.state.eq(OrderState.APPROVED)).then("구매 승인")
+                                .otherwise("구매 취소됨"),
                         orders.orderDate))
                 .from(orders)
                 .innerJoin(member).on(orders.member.eq(member))
