@@ -43,6 +43,15 @@ public class Item {
     @OneToMany(mappedBy = "item")
     private List<Orders> ordersList = new ArrayList<>();
 
+    public Item(Long no, String name, Long price, Long quantity, ItemState state, LocalDateTime enrollDate, Member member) {
+        this.no = no;
+        this.name = name;
+        this.price = price;
+        this.quantity = quantity;
+        this.state = state;
+        this.enrollDate = enrollDate;
+        this.member = member;
+    }
 
     public static Item enrollNew(ItemDto dto, Member member) {
         return Item.builder()

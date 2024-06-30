@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 import wanted.market.api.model.dto.item.ItemDetailResponseDto;
 import wanted.market.api.model.dto.item.ItemListResponseDto;
 import wanted.market.api.model.dto.orders.OrderLog;
+import wanted.market.api.model.entity.Item;
 import wanted.market.api.repository.CustomItemRepository;
 
 import java.util.List;
@@ -71,6 +72,26 @@ public class ItemRepositoryImpl implements CustomItemRepository {
         List<OrderLog> logs = getLogs(findItem.getNickname(), nickname, itemNo);
         findItem.verify(isSeller(findItem.getNickname(), nickname), logs);
         return findItem;
+    }
+
+    /**
+     * 구매 확정을 위한 상품 엔티티 조회(판매자용)
+     * @param itemNo
+     * @return
+     */
+    @Override
+    public Item findById(Long itemNo) {
+        return queryFactory.select(Projections.constructor(Item.class,
+                    item.no,
+                    item.name,
+                    item.price,
+                    item.quantity,
+                    item.state,
+                    item.enrollDate,
+                    item.member))
+                .from(item)
+                .where(item.no.eq(itemNo))
+                .fetchOne();
     }
 
     private boolean isSeller(String sellerNick, String memberNick) {

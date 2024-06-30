@@ -13,11 +13,12 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 //판매자와 구매자는 제품의 상세정보를 조회하면 당사자간의 거래내역을 확인할 수 있습니다.
 public class OrderLog {
+    private long no;
     private String seller;
     private String buyer;
     private long price;
     private long quantity;
     private String state;
     private LocalDateTime orderDate;
-
+    private LocalDateTime purchaseDate;
 }

@@ -1,10 +1,7 @@
 package wanted.market.api.model.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import wanted.market.api.model.type.OrderState;
 
 import java.time.LocalDateTime;
@@ -40,6 +37,9 @@ public class Orders {
     @Column(name = "ORDER_DATE")
     private LocalDateTime orderDate;
 
+    @Column(name = "PURCHASE_DATE")
+    private LocalDateTime purchaseDate;
+
     public static Orders addition(Item item, Member buyer) {
         return Orders.builder()
                 .no(null)
@@ -49,6 +49,18 @@ public class Orders {
                 .member(buyer)
                 .state(OrderState.OUTSTANDING)
                 .orderDate(LocalDateTime.now())
+                .purchaseDate(null)
                 .build();
+    }
+
+    public void setPurchase(String state) {
+        this.state = getState(state);
+        if(this.state.equals(OrderState.APPROVED)) {
+            purchaseDate = LocalDateTime.now();
+        }
+    }
+
+    private OrderState getState(String state) {
+        return state.equals("승인") ? OrderState.APPROVED : OrderState.CANCELED;
     }
 }

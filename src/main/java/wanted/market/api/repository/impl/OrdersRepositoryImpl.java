@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import wanted.market.api.model.dto.item.ItemPurchaseResponseDto;
 import wanted.market.api.model.dto.orders.OrderLog;
+import wanted.market.api.model.entity.Item;
 import wanted.market.api.model.entity.Orders;
 import wanted.market.api.model.type.OrderState;
 import wanted.market.api.repository.CustomOrdersRepository;
@@ -29,16 +30,17 @@ public class OrdersRepositoryImpl implements CustomOrdersRepository {
     @Override
     public List<OrderLog> findAll(Long itemNo) {
         return queryFactory.select(Projections.constructor(OrderLog.class,
+                    orders.no,
                     item.member.nickname,
                     member.nickname,
                     orders.price,
                     orders.item.quantity,
-                        new CaseBuilder()
-                                .when(orders.state.eq(OrderState.OUTSTANDING)).then("구매 대기중")
-                                .when(orders.state.eq(OrderState.CONFIRMED)).then("구매 확정")
-                                .when(orders.state.eq(OrderState.APPROVED)).then("구매 승인")
-                                .otherwise("구매 취소됨"),
-                    orders.orderDate))
+                    new CaseBuilder()
+                            .when(orders.state.eq(OrderState.OUTSTANDING)).then("구매 대기중")
+                            .when(orders.state.eq(OrderState.APPROVED)).then("구매 승인")
+                            .otherwise("구매 취소됨"),
+                    orders.orderDate,
+                    orders.purchaseDate))
                 .from(orders)
                 .innerJoin(member).on(orders.member.eq(member))
                 .where(orders.item.no.eq(itemNo))
@@ -54,16 +56,17 @@ public class OrdersRepositoryImpl implements CustomOrdersRepository {
     @Override
     public List<OrderLog> findAll(Long itemNo, String nickname) {
         return queryFactory.select(Projections.constructor(OrderLog.class,
+                        orders.no,
                         item.member.nickname,
                         member.nickname,
                         orders.price,
                         orders.item.quantity,
                         new CaseBuilder()
                                 .when(orders.state.eq(OrderState.OUTSTANDING)).then("구매 대기중")
-                                .when(orders.state.eq(OrderState.CONFIRMED)).then("구매 확정")
                                 .when(orders.state.eq(OrderState.APPROVED)).then("구매 승인")
                                 .otherwise("구매 취소됨"),
-                        orders.orderDate))
+                        orders.orderDate,
+                        orders.purchaseDate))
                 .from(orders)
                 .innerJoin(member).on(orders.member.eq(member))
                 .where(orders.item.no.eq(itemNo).and(member.nickname.eq(nickname)))
@@ -78,15 +81,53 @@ public class OrdersRepositoryImpl implements CustomOrdersRepository {
     @Override
     public ItemPurchaseResponseDto findPurchaseLog(long orderNo) {
         return queryFactory.select(Projections.constructor(ItemPurchaseResponseDto.class,
-                    orders.orderDate.stringValue()
-                            .concat("_")
-                            .concat(orders.no.stringValue()),
-                    orders.item.name,
-                    orders.price,
-                    orders.quantity,
-                    orders.orderDate))
+                        orders.orderDate.stringValue()
+                                .concat("_")
+                                .concat(orders.no.stringValue()),
+                        orders.item.name,
+                        orders.price,
+                        orders.quantity,
+                        orders.orderDate))
                 .from(orders)
                 .where(orders.no.eq(orderNo))
                 .fetchOne();
     }
+
+    /**
+     * 주문 기록 조회
+     * @param orderNo
+     * @return
+     */
+    @Override
+    public Orders findById(Long orderNo) {
+        return queryFactory.select(Projections.constructor(Orders.class,
+                        orders.no,
+                        orders.price,
+                        orders.quantity,
+                        orders.item,
+                        orders.member,
+                        orders.state,
+                        orders.orderDate,
+                        orders.purchaseDate))
+                .from(orders)
+                .where(orders.no.eq(orderNo))
+                .fetchOne();
+    }
+
+    /**
+     * 구매 확정되지 않은 상품이 존재하는 지
+     * @param item
+     * @return
+     */
+    @Override
+    public boolean isExist(Item item) {
+        Integer result = queryFactory.selectOne()
+                .from(orders)
+                .where(orders.item.eq(item).and(orders.state.eq(OrderState.OUTSTANDING)))
+                .fetchFirst();
+        return result != null;
+    }
+
+
+
 }

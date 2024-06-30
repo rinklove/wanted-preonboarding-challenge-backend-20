@@ -16,5 +16,5 @@ public class ItemPurchaseResponseDto {
     private String itemName;
     private long price;
     private long quantity;
-    private LocalDateTime purchaseDate;
+    private LocalDateTime orderDate;
 }

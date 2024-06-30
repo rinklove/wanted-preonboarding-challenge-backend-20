@@ -11,6 +11,7 @@ import wanted.market.api.model.dto.item.ItemDetailResponseDto;
 import wanted.market.api.model.dto.item.ItemDto;
 import wanted.market.api.model.dto.item.ItemListResponseDto;
 import wanted.market.api.model.dto.item.ItemPurchaseResponseDto;
+import wanted.market.api.model.dto.orders.SellRequestDto;
 import wanted.market.api.service.ItemService;
 
 import java.util.List;
@@ -61,5 +62,9 @@ public class ItemController {
         return ResponseEntity.status(HttpStatus.CREATED).body(itemService.purchase(token, no));
     }
 
-
+    @PatchMapping("/sell")
+    public ResponseEntity<String> setSellState(@RequestHeader(name = "Authorization") String token,
+                                               @RequestBody SellRequestDto dto) {
+        return ResponseEntity.status(HttpStatus.OK).body(itemService.setState(token, dto));
+    }
 }

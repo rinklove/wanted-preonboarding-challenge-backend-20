@@ -13,10 +13,12 @@ import wanted.market.api.model.dto.item.ItemDetailResponseDto;
 import wanted.market.api.model.dto.item.ItemDto;
 import wanted.market.api.model.dto.item.ItemListResponseDto;
 import wanted.market.api.model.dto.item.ItemPurchaseResponseDto;
+import wanted.market.api.model.dto.orders.SellRequestDto;
 import wanted.market.api.model.entity.Item;
 import wanted.market.api.model.entity.Member;
 import wanted.market.api.model.entity.Orders;
 import wanted.market.api.model.type.ItemState;
+import wanted.market.api.model.type.OrderState;
 import wanted.market.api.repository.ItemRepository;
 import wanted.market.api.repository.OrdersRepository;
 import wanted.market.api.repository.impl.ItemRepositoryImpl;
@@ -67,30 +69,65 @@ public class ItemServiceImpl implements ItemService {
      * @return
      */
     @Override
+    @Transactional
     public ItemPurchaseResponseDto purchase(String token, Long itemNo) {
         Item findItem = itemRepository.findById(itemNo).orElseThrow(() -> new NoResultException("해당하는 상품이 없습니다."));
-        log.info("findItem = {}", findItem);
         Member findMember = authService.findByToken(manufactureToken(token));
-
         if(findItem.getMember().equals(findMember)) {
             throw new RuntimeException("구매자는 자신의 상품을 구매할 수 없습니다");
         }
 
-        updateQuantity(findItem);
+        minusQuantity(findItem);
+        updateState(findItem);
 
         Orders newOrders = Orders.addition(findItem, findMember);
         Orders orders = ordersRepository.saveAndFlush(newOrders);
         return ordersRepositoryImpl.findPurchaseLog(orders.getNo());
     }
 
-    private void updateQuantity(Item findItem) {
+    private void minusQuantity(Item findItem) {
         Long quantity = findItem.getQuantity();
         if(quantity == 0) {
-            throw new IllegalStateException("구매 가능한 상품 수량이 없습니다.");
+            throw new IllegalStateException("구매 가능한 상품이 없습니다");
         }
         findItem.setQuantity(quantity-1);
-        if(quantity == 1) {
+    }
+
+    /**
+     * 판매자의 구매 확정
+     * @param token
+     * @param dto
+     * @return
+     */
+    @Override
+    @Transactional
+    public String setState(String token, SellRequestDto dto) {
+        //해당 상품이 자신이 등록한 상품이 맞는지 확인.
+        Member findMember = authService.findByToken(manufactureToken(token));
+        Item findItem = itemRepositoryImpl.findById(dto.getItemNo());
+        if(!findItem.getMember().equals(findMember)) {
+            throw new RuntimeException("판매자가 아닙니다.");
+        }
+        //승인 여부 결정
+        Orders findOrder = ordersRepository.findById(dto.getOrderNo()).orElseThrow(() -> new NoResultException("해당하는 주문이 없습니다"));
+        findOrder.setPurchase(dto.getState());
+
+        if(findOrder.getState().equals(OrderState.CANCELED)) {
+            findItem.setQuantity(findItem.getQuantity()+1);
+            updateState(findItem);
+        } else if(!ordersRepositoryImpl.isExist(findItem)) {
+            findItem.setState(ItemState.SOLD_OUT);
+        }
+
+        return dto.getState()+" 성공";
+    }
+
+    private void updateState(Item findItem) {
+        Long quantity = findItem.getQuantity();
+        if(quantity == 0) {
             findItem.setState(ItemState.RESERVING);
+        } else if(!findItem.getState().equals(ItemState.SELLING)){
+            findItem.setState(ItemState.SELLING);
         }
     }
 
