@@ -40,7 +40,8 @@ public class ItemController {
      * @return
      */
     @GetMapping("/{itemNo}")
-    public ResponseEntity<ItemDetailResponseDto> getOne(@PathVariable Long itemNo, @RequestHeader(name = "Authorization", required = false) String token) {
+    public ResponseEntity<ItemDetailResponseDto> getOne(@PathVariable Long itemNo,
+                                                        @RequestHeader(name = "Authorization", required = false) String token) {
         return ResponseEntity.status(HttpStatus.OK).body(itemService.findOne(itemNo, token));
     }
 

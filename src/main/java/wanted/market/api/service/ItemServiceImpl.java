@@ -13,16 +13,18 @@ import wanted.market.api.model.dto.item.ItemDetailResponseDto;
 import wanted.market.api.model.dto.item.ItemDto;
 import wanted.market.api.model.dto.item.ItemListResponseDto;
 import wanted.market.api.model.dto.item.ItemPurchaseResponseDto;
+import wanted.market.api.model.dto.orders.OrderListRequestDto;
+import wanted.market.api.model.dto.orders.OrderLog;
 import wanted.market.api.model.dto.orders.SellRequestDto;
 import wanted.market.api.model.entity.Item;
 import wanted.market.api.model.entity.Member;
 import wanted.market.api.model.entity.Orders;
 import wanted.market.api.model.type.ItemState;
 import wanted.market.api.model.type.OrderState;
+import wanted.market.api.repository.CustomItemRepository;
+import wanted.market.api.repository.CustomOrdersRepository;
 import wanted.market.api.repository.ItemRepository;
 import wanted.market.api.repository.OrdersRepository;
-import wanted.market.api.repository.impl.ItemRepositoryImpl;
-import wanted.market.api.repository.impl.OrdersRepositoryImpl;
 
 import java.util.List;
 
@@ -32,9 +34,9 @@ import java.util.List;
 public class ItemServiceImpl implements ItemService {
 
     private final ItemRepository itemRepository;
-    private final ItemRepositoryImpl itemRepositoryImpl;
+    private final CustomItemRepository itemRepositoryImpl;
     private final OrdersRepository ordersRepository;
-    private final OrdersRepositoryImpl ordersRepositoryImpl;
+    private final CustomOrdersRepository ordersRepositoryImpl;
     private final AuthService authService;
     private final JwtTokenProvider tokenProvider;
     private final int PAGE_SIZE = 7;
@@ -42,22 +44,22 @@ public class ItemServiceImpl implements ItemService {
     @Override
     @Transactional(readOnly = true)
     public List<ItemListResponseDto> findList(int page) {
-        Pageable pageRequest = getPageable(page);
+        Pageable pageRequest = getPageable(page, "enrollDate");
         return itemRepositoryImpl.findAll(pageRequest);
     }
 
     @Override
     @Transactional(readOnly = true)
     public ItemDetailResponseDto findOne(Long itemNo, String token) {
-        String nickname = token != null ? tokenProvider.getNickname(manufactureToken(token)) : null;
-        return itemRepositoryImpl.findById(itemNo, nickname);
+        String nickname = token != null ? tokenProvider.getNickname(token.substring(7)) : null;
+        return itemRepositoryImpl.findById(itemNo, nickname, getPageable(1, "orderDate"));
     }
 
     @Override
     @Transactional
     public String enrollItem(String token, ItemDto dto) {
         log.info("token = {}", token);
-        Item newItem = Item.enrollNew(dto, authService.findByToken(manufactureToken(token)));
+        Item newItem = Item.enrollNew(dto, authService.findByToken(token));
         itemRepository.save(newItem);
         return "등록 완료";
     }
@@ -72,7 +74,7 @@ public class ItemServiceImpl implements ItemService {
     @Transactional
     public ItemPurchaseResponseDto purchase(String token, Long itemNo) {
         Item findItem = itemRepository.findById(itemNo).orElseThrow(() -> new NoResultException("해당하는 상품이 없습니다."));
-        Member findMember = authService.findByToken(manufactureToken(token));
+        Member findMember = authService.findByToken(token);
         if(findItem.getMember().equals(findMember)) {
             throw new RuntimeException("구매자는 자신의 상품을 구매할 수 없습니다");
         }
@@ -103,7 +105,7 @@ public class ItemServiceImpl implements ItemService {
     @Transactional
     public String setState(String token, SellRequestDto dto) {
         //해당 상품이 자신이 등록한 상품이 맞는지 확인.
-        Member findMember = authService.findByToken(manufactureToken(token));
+        Member findMember = authService.findByToken(token);
         Item findItem = itemRepositoryImpl.findById(dto.getItemNo());
         if(!findItem.getMember().equals(findMember)) {
             throw new RuntimeException("판매자가 아닙니다.");
@@ -122,6 +124,16 @@ public class ItemServiceImpl implements ItemService {
         return dto.getState()+" 성공";
     }
 
+
+    @Override
+    public List<OrderLog> getOrders(String token, OrderListRequestDto dto) {
+        String findNick = itemRepository.findMember_NicknameByNo(dto.getItemNo());
+        return findNick.equals(tokenProvider.getNickname(token.substring(7))) ?
+                ordersRepositoryImpl.findAll(dto.getItemNo(), getPageable(dto.getPage(), "orderDate")) :
+                ordersRepositoryImpl.findAll(dto.getItemNo(), findNick, getPageable(dto.getPage(), "orderDate"));
+
+    }
+
     private void updateState(Item findItem) {
         Long quantity = findItem.getQuantity();
         if(quantity == 0) {
@@ -131,11 +143,7 @@ public class ItemServiceImpl implements ItemService {
         }
     }
 
-    private String manufactureToken(String token) {
-        return token.substring(7);
-    }
-
-    private Pageable getPageable(int page) {
-        return PageRequest.of(page-1, PAGE_SIZE, Sort.Direction.DESC, "enrollDate");
+    private Pageable getPageable(int page, String point) {
+        return PageRequest.of(page-1, PAGE_SIZE, Sort.Direction.DESC, point);
     }
 }

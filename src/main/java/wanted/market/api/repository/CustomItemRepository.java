@@ -10,7 +10,7 @@ import java.util.List;
 public interface CustomItemRepository {
 
     List<ItemListResponseDto> findAll(Pageable pageable);
-    ItemDetailResponseDto findById(Long itemNo, String memberId);
+    ItemDetailResponseDto findById(Long itemNo, String memberId, Pageable pageable);
 
     Item findById(Long itemNo);
 }

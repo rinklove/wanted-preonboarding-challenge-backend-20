@@ -3,7 +3,6 @@ package wanted.market.api.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.modelmapper.ModelMapper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,7 +21,6 @@ public class AuthServiceImpl implements AuthService {
     private final MemberRepository memberRepository;
     private final JwtTokenProvider tokenProvider;
     private final PasswordEncoder encoder;
-    private final ModelMapper modelMapper;
 
     @Override
     public String login(LoginRequestDto dto) {
@@ -44,9 +42,11 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public Member findByToken(String token) {
+        if(token.startsWith("Bearer ")) {
+            token = token.substring(7);
+        }
         log.info("token = {}", token);
         String memberId = tokenProvider.getMemberId(token);
-        log.info("memberId = {}", memberId);
         return memberRepository.findByMemberId(memberId).orElseThrow(() ->  new IllegalArgumentException("존재하지 않는 회원입니다."));
     }
 }

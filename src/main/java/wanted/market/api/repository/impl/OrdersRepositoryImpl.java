@@ -1,17 +1,23 @@
 package wanted.market.api.repository.impl;
 
+import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import wanted.market.api.model.dto.item.ItemPurchaseResponseDto;
+import wanted.market.api.model.dto.member.MyPageResponseDto;
+import wanted.market.api.model.dto.orders.MypageOrderLog;
 import wanted.market.api.model.dto.orders.OrderLog;
 import wanted.market.api.model.entity.Item;
+import wanted.market.api.model.entity.Member;
 import wanted.market.api.model.entity.Orders;
 import wanted.market.api.model.type.OrderState;
 import wanted.market.api.repository.CustomOrdersRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static wanted.market.api.model.entity.QItem.item;
@@ -28,7 +34,7 @@ public class OrdersRepositoryImpl implements CustomOrdersRepository {
      * @return
      */
     @Override
-    public List<OrderLog> findAll(Long itemNo) {
+    public List<OrderLog> findAll(Long itemNo, Pageable pageable) {
         return queryFactory.select(Projections.constructor(OrderLog.class,
                     orders.no,
                     item.member.nickname,
@@ -44,6 +50,8 @@ public class OrdersRepositoryImpl implements CustomOrdersRepository {
                 .from(orders)
                 .innerJoin(member).on(orders.member.eq(member))
                 .where(orders.item.no.eq(itemNo))
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
                 .fetch();
     }
 
@@ -54,7 +62,7 @@ public class OrdersRepositoryImpl implements CustomOrdersRepository {
      * @return
      */
     @Override
-    public List<OrderLog> findAll(Long itemNo, String nickname) {
+    public List<OrderLog> findAll(Long itemNo, String nickname, Pageable pageable) {
         return queryFactory.select(Projections.constructor(OrderLog.class,
                         orders.no,
                         item.member.nickname,
@@ -70,7 +78,44 @@ public class OrdersRepositoryImpl implements CustomOrdersRepository {
                 .from(orders)
                 .innerJoin(member).on(orders.member.eq(member))
                 .where(orders.item.no.eq(itemNo).and(member.nickname.eq(nickname)))
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
                 .fetch();
+    }
+
+    /**
+     * 마이페이지용 주문 내역 조회
+     * @param loginMember
+     * @param
+     * @return
+     */
+    @Override
+    public MyPageResponseDto findAll(Member loginMember) {
+        OrderState[] states = {OrderState.APPROVED, OrderState.OUTSTANDING};
+        MyPageResponseDto dto = new MyPageResponseDto();
+        for (OrderState state : states) {
+            List<MypageOrderLog> find = queryFactory.select(Projections.constructor(MypageOrderLog.class,
+                            orders.no,
+                            item.no,
+                            item.name,
+                            item.member.nickname,
+                            orders.price,
+                            orders.item.quantity,
+                            new CaseBuilder()
+                                    .when(orders.state.eq(OrderState.OUTSTANDING)).then("구매 대기중")
+                                    .when(orders.state.eq(OrderState.APPROVED)).then("구매 승인")
+                                    .otherwise("구매 취소됨"),
+                            orders.orderDate,
+                            orders.purchaseDate))
+                    .from(orders)
+                    .innerJoin(item).on(orders.item.eq(item))
+                    .where(orders.member.eq(loginMember).and(orders.state.eq(state)))
+                    .orderBy(orders.orderDate.desc())
+                    .limit(10)
+                    .fetch();
+            dto.setList(find, state);
+        }
+        return dto;
     }
 
     /**

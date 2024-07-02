@@ -56,7 +56,7 @@ public class ItemRepositoryImpl implements CustomItemRepository {
      * @return
      */
     @Override
-    public ItemDetailResponseDto findById(Long itemNo, String nickname) {
+    public ItemDetailResponseDto findById(Long itemNo, String nickname, Pageable pageable) {
         ItemDetailResponseDto findItem = queryFactory.select(Projections.constructor(ItemDetailResponseDto.class,
                         item.no,
                         item.name,
@@ -69,7 +69,7 @@ public class ItemRepositoryImpl implements CustomItemRepository {
                 .where(item.no.eq(itemNo))
                 .fetchOne();
 
-        List<OrderLog> logs = getLogs(findItem.getNickname(), nickname, itemNo);
+        List<OrderLog> logs = getLogs(findItem.getNickname(), nickname, itemNo, pageable);
         findItem.verify(isSeller(findItem.getNickname(), nickname), logs);
         return findItem;
     }
@@ -98,16 +98,16 @@ public class ItemRepositoryImpl implements CustomItemRepository {
         return memberNick != null && sellerNick.equals(memberNick);
     }
 
-    private List<OrderLog> getLogs(String sellerNick, String memberNick, Long itemNo) {
+    private List<OrderLog> getLogs(String sellerNick, String memberNick, Long itemNo, Pageable pageable) {
         boolean isMember = memberNick != null;
         if(!isMember)
             return null;
 
         List<OrderLog> logs = null;
         if(isSeller(sellerNick, memberNick)) {
-            logs = ordersRepository.findAll(itemNo);
+            logs = ordersRepository.findAll(itemNo, pageable);
         } else {
-            logs = ordersRepository.findAll(itemNo, memberNick);
+            logs = ordersRepository.findAll(itemNo, memberNick, pageable);
         }
         return logs;
     }
