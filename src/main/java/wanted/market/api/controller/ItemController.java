@@ -57,12 +57,24 @@ public class ItemController {
         return ResponseEntity.status(HttpStatus.CREATED).body(itemService.enrollItem(token, dto));
     }
 
+    /**
+     * 아이템 구매
+     * @param no
+     * @param token
+     * @return
+     */
     @PostMapping("/purchase/{no}")
     public ResponseEntity<ItemPurchaseResponseDto> purchaseItem(@PathVariable Long no,
                                                                 @RequestHeader(name = "Authorization") String token) {
         return ResponseEntity.status(HttpStatus.CREATED).body(itemService.purchase(token, no));
     }
 
+    /**
+     * 판매자의 구매 확정 여부 선택
+     * @param token
+     * @param dto
+     * @return
+     */
     @PatchMapping("/sell")
     public ResponseEntity<String> setSellState(@RequestHeader(name = "Authorization") String token,
                                                @RequestBody SellRequestDto dto) {
