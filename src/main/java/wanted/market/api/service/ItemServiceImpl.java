@@ -73,15 +73,11 @@ public class ItemServiceImpl implements ItemService {
     @Override
     @Transactional
     public ItemPurchaseResponseDto purchase(String token, Long itemNo) {
-        Item findItem = itemRepository.findById(itemNo).orElseThrow(() -> new NoResultException("해당하는 상품이 없습니다."));
-        Member findMember = authService.findByToken(token);
-        if(findItem.getMember().equals(findMember)) {
-            throw new RuntimeException("구매자는 자신의 상품을 구매할 수 없습니다");
-        }
-
+        Item findItem = checkSeller(token, itemNo, "구매자는 자신의 상품을 구매할 수 없습니다");
         minusQuantity(findItem);
         updateState(findItem);
 
+        Member findMember = authService.findByToken(token);
         Orders newOrders = Orders.addition(findItem, findMember);
         Orders orders = ordersRepository.saveAndFlush(newOrders);
         return ordersRepositoryImpl.findPurchaseLog(orders.getNo());
@@ -105,11 +101,7 @@ public class ItemServiceImpl implements ItemService {
     @Transactional
     public String setState(String token, SellRequestDto dto) {
         //해당 상품이 자신이 등록한 상품이 맞는지 확인.
-        Member findMember = authService.findByToken(token);
-        Item findItem = itemRepositoryImpl.findById(dto.getItemNo());
-        if(!findItem.getMember().equals(findMember)) {
-            throw new RuntimeException("판매자가 아닙니다.");
-        }
+        Item findItem = checkSeller(token, dto.getItemNo(), "판매자가 아닙니다.");
         //승인 여부 결정
         Orders findOrder = ordersRepository.findById(dto.getOrderNo()).orElseThrow(() -> new NoResultException("해당하는 주문이 없습니다"));
         findOrder.setPurchase(dto.getState());
@@ -122,6 +114,17 @@ public class ItemServiceImpl implements ItemService {
         }
 
         return dto.getState()+" 성공";
+    }
+
+    private Item checkSeller(String token, Long no, String errorMessage) {
+        Member findMember = authService.findByToken(token);
+        Item findItem = itemRepositoryImpl.findById(no);
+        if(!findItem.getMember().equals(findMember) && errorMessage.equals("판매자가 아닙니다.")) {
+            throw new RuntimeException(errorMessage);
+        } else if(findItem.getMember().equals(findMember) && errorMessage.equals("구매자는 자신의 상품을 구매할 수 없습니다")) {
+            throw new RuntimeException(errorMessage);
+        }
+        return findItem;
     }
 
     /**
@@ -149,7 +152,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     @Transactional
     public String update(String token, ItemDto dto) {
-        Item findItem = itemRepository.findById(dto.getNo()).orElseThrow(() -> new NoResultException("해당하는 상품이 없습니다."));
+        Item findItem = checkSeller(token, dto.getNo(), "판매자가 아닙니다.");
         log.info("dto = {}", dto);
         updateItem(dto, findItem);
         return "수정 완료";
