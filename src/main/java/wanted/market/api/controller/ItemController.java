@@ -80,4 +80,10 @@ public class ItemController {
                                                @RequestBody SellRequestDto dto) {
         return ResponseEntity.status(HttpStatus.OK).body(itemService.setState(token, dto));
     }
+
+    @PatchMapping("/update")
+    public ResponseEntity<String> update(@RequestHeader(name = "Authorization") String token,
+                                         @RequestBody ItemDto dto) {
+        return ResponseEntity.status(HttpStatus.OK).body(itemService.update(token, dto));
+    }
 }

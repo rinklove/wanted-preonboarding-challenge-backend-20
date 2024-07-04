@@ -124,7 +124,13 @@ public class ItemServiceImpl implements ItemService {
         return dto.getState()+" 성공";
     }
 
-
+    /**
+     * 내가 구매한 상품 목록 &
+     * 내가 예약한 상품 목록 조회
+     * @param token
+     * @param dto
+     * @return
+     */
     @Override
     public List<OrderLog> getOrders(String token, OrderListRequestDto dto) {
         String findNick = itemRepository.findMember_NicknameByNo(dto.getItemNo());
@@ -134,10 +140,42 @@ public class ItemServiceImpl implements ItemService {
 
     }
 
+    /**
+     * 아이템 정보 수정
+     * @param token
+     * @param dto
+     * @return
+     */
+    @Override
+    @Transactional
+    public String update(String token, ItemDto dto) {
+        Item findItem = itemRepository.findById(dto.getNo()).orElseThrow(() -> new NoResultException("해당하는 상품이 없습니다."));
+        log.info("dto = {}", dto);
+        updateItem(dto, findItem);
+        return "수정 완료";
+    }
+
+    private void updateItem(ItemDto dto, Item findItem) {
+        if(dto.getName() != null) {
+            findItem.setName(dto.getName());
+        }
+        if(dto.getPrice() != null) {
+            findItem.setPrice(dto.getPrice());
+        }
+        if(dto.getQuantity() != null) {
+            findItem.setQuantity(dto.getQuantity());
+            updateState(findItem);
+        }
+    }
+
     private void updateState(Item findItem) {
         Long quantity = findItem.getQuantity();
         if(quantity == 0) {
-            findItem.setState(ItemState.RESERVING);
+            if(ordersRepositoryImpl.isExist(findItem)) {
+                findItem.setState(ItemState.RESERVING);
+            } else {
+                findItem.setState(ItemState.SOLD_OUT);
+            }
         } else if(!findItem.getState().equals(ItemState.SELLING)){
             findItem.setState(ItemState.SELLING);
         }

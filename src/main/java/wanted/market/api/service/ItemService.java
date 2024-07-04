@@ -24,4 +24,6 @@ public interface ItemService {
     String setState(String token, SellRequestDto dto);
 
     List<OrderLog> getOrders(String token, OrderListRequestDto dto);
+
+    String update(String token, ItemDto dto);
 }

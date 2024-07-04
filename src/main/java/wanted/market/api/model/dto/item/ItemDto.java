@@ -12,15 +12,16 @@ import lombok.ToString;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ItemDto {
+    private Long no;
 
     @NotNull(message = "상품 이름은 필수 입력값입니다.")
     private String name;
 
     @NotNull(message = "가격을 입력하세요")
     @Min(value = 100)
-    private long price;
+    private Long price;
 
     @NotNull(message = "상품 수량은 1이상 입력하세요")
     @Min(value = 1)
-    private long quantity;
+    private Long quantity;
 }
